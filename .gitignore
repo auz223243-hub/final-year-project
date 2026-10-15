@@ -1,0 +1,6 @@
+data/raw/
+output/fits/
+*.log
+.Rhistory
+.RData
+.Rproj.user/

@@ -1,0 +1,19 @@
+"fig","quantity","mode","hdi_l","hdi_u","paper_mode"
+"9-cp","Male mean (= diff of means)",0.066,0.004,0.12,0.059
+"9-cp","Male SD",0.874,0.834,0.914,0.87
+"9-cp","Difference of SD",-0.126,-0.166,-0.086,-0.13
+"9-cp","Effect size",0.073,0.004,0.131,0.065
+"9-g","Female mean",4.042,3.963,4.105,4.035
+"9-g","Male mean",4.091,4.055,4.133,4.092
+"9-g","Difference of means",0.059,-0.029,0.134,0.049
+"9-g","Female SD",1.477,1.428,1.527,1.477
+"9-g","Male SD",1.331,1.303,1.358,1.33
+"9-g","Difference of SD",-0.141,-0.203,-0.088,-0.143
+"9-g","Effect size",0.043,-0.019,0.1,0.036
+"10","cp Tair_s (standardised)",0.343,0.314,0.37,0.343
+"10","g Tair_s (standardised)",0.468,0.439,0.503,0.475
+"10","cp Tair (per degC)",0.162,0.149,0.175,0.162
+"10","g Tair (per degC)",0.221,0.208,0.238,0.224
+"11","Spacing (structured)",0.717,0.69,0.747,0.716
+"11","Mean spacing (unstructured)",0.778,0.749,0.816,0.781
+"11","Difference in spacing",-0.061,-0.108,-0.02,-0.067
