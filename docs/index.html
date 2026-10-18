@@ -119,10 +119,10 @@ const CONFIG = {
   ENDPOINT: "https://script.google.com/macros/s/AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrCcb2e3atyM9NVYW1wYa_WHkG3mF/exec",
   // Must match KEY in survey/apps_script.gs.
   KEY: "fyp-ccv-2026",
-  // Participant codes shown on the first screen: P01 ... P60.
+  // Participant codes shown on the first screen: P01 ... P25.
   CODE_PREFIX: "P",
-  CODE_COUNT: 60,
-  VERSION: "2026-10-16"
+  CODE_COUNT: 25,
+  VERSION: "2026-10-18"
 };
 /* ================================================================ */
 
@@ -237,7 +237,7 @@ const CONFIG = {
       let h = q("Compared with most people, I usually feel…", "和大多數人相比，我通常覺得…", "Asked once only. 只問一次。") + `<div class="opts">`;
       SELF.forEach(([v, en, cn]) => { h += opt("self-" + v, en, cn, store.get("ccv_self") === String(v)); });
       screen.innerHTML = h + `</div>`;
-      bindSingle("self", (v) => store.set("ccv_self", String(v)));
+      bindSingle("self", (v) => { a.self_sens = v; store.set("ccv_self", String(v)); });
     } else if (s === "seat") {
       const last = store.get("ccv_seat");
       let h = q("Where are you sitting?", "你坐在哪個區域？", "Tap your zone on the classroom map. 請點選你所在的區域。");
@@ -333,7 +333,7 @@ const CONFIG = {
       sun: a.extra.has("sun") ? 1 : 0,
       draught: a.extra.has("draught") ? 1 : 0,
       stuffy: a.extra.has("stuffy") ? 1 : 0,
-      self_sens: Number(store.get("ccv_self")) || "",
+      self_sens: a.self_sens || Number(store.get("ccv_self")) || "",
       duration_s: Math.round((Date.now() - t0) / 1000),
       device_id: deviceId(),
       version: CONFIG.VERSION,
