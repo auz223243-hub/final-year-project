@@ -1,4 +1,4 @@
-# 交接文档 HANDOFF（2026-10-18）
+# 交接文档 HANDOFF（2026-10-18，下午更新）
 
 给接手的 Claude Code：这份文档总结了到目前为止的全部决定、现状和待办。请先读完再动手。
 用户是 LUO ZI YAN（PolyU BSE3716 毕业论文，项目编号 FX02，导师 Fu XIAO），交流用中文。
@@ -31,8 +31,8 @@ EnergyPlus 里的空调控制器上，看个性化能不能在同等舒适下省
 | 修订版 proposal | 完成（10/15 版），**还需按第 3 节的新决定再改一次** | `proposal/`（`node build.js out.docx` 重新生成，需要 npm 包 `docx`） |
 | R/brms 环境 + Favero 复现 | 完成，44 个参数误差 ≤ 0.005，LOOIC 一致 | `R/`、`output/` |
 | 在线问卷网页 | 已上线（GitHub Pages，分支 `survey-site`，目录 `/docs`） | `docs/index.html` |
-| 问卷后台（Google Apps Script → Google 表格） | **未通，见下方"当前问题"** | `survey/apps_script.gs`、`survey/README.md` |
-| 二维码 | 完成，指向问卷网址 | `survey/vote_qr.png` |
+| 问卷后台（Google Apps Script → Google 表格） | **已通**（10/18 用户扫码投票，`/exec` 显示 `votes: 1`） | `survey/apps_script.gs`、`survey/README.md` |
+| 二维码 | 完成（10/18 重新生成，高容错 H 级、1200 px，已解码验证指向问卷网址） | `survey/vote_qr.png` |
 | Microsoft Forms 备用方案 | 导入用 Word 文件（已不用，留作备份） | `survey/msforms_backup/` |
 
 - 问卷网址：<https://auz223243-hub.github.io/final-year-project/>（加 `?preview` 为测试模式，不发送数据）
@@ -41,38 +41,30 @@ EnergyPlus 里的空调控制器上，看个性化能不能在同等舒适下省
 - Apps Script 项目 ID（scriptId，从用户给的库链接得到）：`1R1MZJLTFoITGdBC9KyllHrjoZpX37rndtAuYM1Yl9IKt-vVeTzoEWKmM`
 - Google 账号：auz223243@gmail.com
 
-### 当前问题（P0，最先处理）
+### 问卷后台：问题与修复记录（10/18 已解决）
 
-1. 用户的 Apps Script 项目是在 script.google.com 直接新建的（不是从表格打开的），旧代码里
-   `SpreadsheetApp.getActiveSpreadsheet()` 返回 null，`/exec` 报错
-   `TypeError: Cannot read properties of null (reading 'getSheetByName') (line 49)`。
-2. 仓库里的新版 `survey/apps_script.gs` 已修复（没有绑定表格时会自动新建 "Classroom Comfort Votes"
-   表格并把 ID 存进 Script Properties，另有 `setup()` 函数）。
-3. 但用户把新版本部署成了**库（Library）**，网页应用（Web app）部署仍在跑旧版本；用户运行 `setup()`
-   后日志也没有显示表格链接（原因未确认：可能没粘贴新代码、选错了函数，或授权没走完）。
+- **原因**：Apps Script 项目是在 script.google.com 直接新建的（不绑定表格）。旧代码（版本 1）带
+  `@OnlyCurrentDoc` 并用 `getActiveSpreadsheet()`，在独立项目里返回 null，`/exec` 报
+  `Cannot read properties of null (reading 'getSheetByName')`。
+- **修复**：新版 `survey/apps_script.gs` 在没有绑定表格时自动新建 "Classroom Comfort Votes" 表格，
+  ID 存在 Script Properties 的 `SHEET_ID`。用 clasp 3.4.1 核对过：网页应用部署 `AKfycbyjZ_6y…` 指向
+  **版本 2**，和仓库里的 `apps_script.gs` 逐字相同；另一个 `@HEAD` 部署是每个项目自带的开发部署，不用管。
+  最后一步是用户本人打开 `/exec` 授予表格读写权限（这一步任何工具都替代不了）。
+- **验收**：用户扫码投了一票，`/exec` 返回 `votes: 1`。
+- **待用户自己做**：①在表格里删掉这条测试行（第 2 行；第 1 行表头保留）；②表格"文件 → 设置 → 时区"
+  确认为 GMT+08:00 Hong Kong（`server_time` 按表格时区显示，之后要和传感器时间对齐）；
+  ③到 <https://myaccount.google.com/permissions> 撤销 clasp 授权。
+- **云端会话的限制**：`script.google.com` 和 `*.github.io` 被网络策略拦截，没法直接测试 `/exec` 或线上页面；
+  `script.googleapis.com` 等 API 可以访问。clasp 的授权里没有 Sheets 权限，所以读不了也删不了表格行。
+  **不要**为了远程删行给后台加管理接口：密钥写在公开网页里，谁都能调用。
+- **以后改后台代码**：在 `survey/` 目录用 clasp 推送（`.clasp.json`、`appsscript.json`、`.claspignore` 已配好），
+  步骤见 `survey/README.md`。关键是**更新原部署**（clasp 2.4.2：`deploy -i <部署ID>`；clasp 3：
+  `redeploy <部署ID>`），不要新建部署，否则网址和二维码都会变。
 
-**建议用 clasp 在用户电脑上直接修复，保持原网址。** 云端会话做不了这一步：`script.google.com`
-被网络策略拦截，而且 `clasp login` 需要用户在自己浏览器里授权。`survey/` 里已经放好
-`.clasp.json`（scriptId）、`appsscript.json`（网页应用设置）和 `.claspignore`（只推送
-`apps_script.gs` 和 manifest，已用 `clasp status` 验证），用户不需要改任何文件。
-完整步骤见 `survey/README.md` 的 "Updating the live backend with clasp"，要点：
-
-```bash
-cd survey                                   # survey-site 分支
-npx @google/clasp@2.4.2 login               # 固定 2.4.2：clasp 3 改了 deploy 命令
-npx @google/clasp@2.4.2 push                # 问是否覆盖 manifest 时选 y
-npx @google/clasp@2.4.2 open                # 在编辑器里选 setup → 运行 → 授权，日志显示表格链接
-npx @google/clasp@2.4.2 deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrCcb2e3atyM9NVYW1wYa_WHkG3mF -d "fix standalone sheet"
-```
-
-`clasp deploy -i <部署ID>` 会更新已有的网页应用部署，网址不变，`docs/index.html` 不用改。
-
-**验收：**
-1. 浏览器打开 `/exec`，返回 `{"ok":true,"votes":0}`。
-2. 手机扫码投一票，Google Drive 里的 "Classroom Comfort Votes" 表格的 `votes` 工作表多出一行，
-   列为：`server_time, sid, client_time, participant, seat_zone, tsv, tpv, accept, garments, clo,
-   clo_tbc, activity, sun, draught, stuffy, self_sens, duration_s, device_id, version`。
-3. 测试完删掉测试行。
+**问卷数据列核对（10/18）**：用无头浏览器以 `?preview` 跑了首次投票和同一手机再次投票两种流程，
+18 列全部有值。必答题（座位、热感觉、偏好、可接受度、活动）不选不能前进；衣物至少选 1 件；
+`sun/draught/stuffy` 未勾选记 0；`self_sens` 首次填写后每行都带。**唯一合法留空的列是 `clo_tbc`**
+（只有选了没有标准 clo 值的"羽絨"或"圍巾"时才有内容）。`version = 2026-10-18` 的行来自当前版本。
 
 注意：页面用 `fetch(..., {mode: "no-cors"})` 发送，读不到服务器回复；断网时投票会存在手机
 `localStorage`（`ccv_queue`），下次打开页面自动补发；每票带唯一 `sid`，服务器用 CacheService
@@ -82,8 +74,8 @@ npx @google/clasp@2.4.2 deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrC
 
 - **伦理**：导师说只做匿名问卷不用走 HSEARS。仍建议拿到书面确认（邮件）。问卷首页保留自愿、匿名、可退出的说明。
   如果以后真的要在实地改变教室温度，属于干预研究，需要重新确认伦理。
-- **样本**：导师曾认为 20 人太少、建议 40–60 人；用户 10/18 决定第一批按 **25 人**设计（问卷编号 P01–P25），
-  理由是 25 人 × 每节课 3 票的总票数足够。是否和导师确认、第二批是否再招人待定。分两批：
+- **样本**：导师曾认为 20 人太少、建议 40–60 人；用户 10/18 决定第一批按约 25 人设计、问卷编号开到 **P01–P30**
+  （留余量：当天来的人多也够用），理由是 25 人 × 每节课 3 票的总票数足够。是否和导师确认、第二批是否再招人待定。分两批：
   - 第一批：用户每周一在选定教室上的课，本学期剩 **7 次**（约 10 月底至 11 月底），**每节课投 3 次**
     （开课约 15 分钟后、中段、下课前约 15 分钟，两次至少隔 30 分钟），每人预计约 15 票。
   - 第二批：第二学期（2027 年 1–3 月）的新班级，可招 2–3 个班。
@@ -92,7 +84,7 @@ npx @google/clasp@2.4.2 deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrC
 - **问卷题目**：删掉性别、年龄、籍贯、来港年数（Model C 的个人参数已吸收这些固定特征，也减少个人数据）。
   只保留一次性的 `self_sens`（"和大多数人比我通常偏冷/偏热"，1–5），用来和 Model C 估计的个人偏移对照。
   每次投票 7 题：座位区、热感觉（7 点）、热偏好、可接受度、衣物（20 项多选）、过去 15 分钟活动、其他感受（可选）。
-  编号 P01–P25（随机抽卡，研究员不记录谁抽了哪张）。
+  编号 P01–P30（随机抽卡，研究员不记录谁抽了哪张）。
 - **数据质量规则**（收数据前写进方法章节，分析时做敏感性分析：删除标记 vs 保留全部）：
   - `duration_s` < 10 秒 → 标记；
   - 不在投票时段内提交 → 删除；
@@ -128,9 +120,10 @@ npx @google/clasp@2.4.2 deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrC
 ## 4. 待办（按优先级）
 
 **P0 本周（目标：下周一开始第一批采集）**
-- [ ] 修好 Apps Script 部署并端到端测试（见第 2 节）。
+- [x] 修好 Apps Script 部署并端到端测试（10/18 完成，见第 2 节）。
+- [ ] 用户：删测试行、核对表格时区、撤销 clasp 授权（见第 2 节"待用户自己做"）。
 - [ ] 问用户：周一那门课多长、多少人、哪间教室；拿到教室布局后改 `docs/index.html` 里的座位图（ZONES 和窗/门位置）。
-- [ ] 准备：打印 P01–P25 编号卡、课件里放二维码、一段 1 分钟的研究介绍。
+- [ ] 准备：打印 P01–P30 编号卡、课件里放二维码、一段 1 分钟的研究介绍。
 - [ ] 帮用户起草给导师的邮件：确认免伦理（书面）、两批采集方案、每节课 3 票、第一批 25 人。
 - [ ] 传感器：确认型号、导出方式、记录间隔；问实验室借黑球温度计和热线风速仪。
 
@@ -151,8 +144,9 @@ npx @google/clasp@2.4.2 deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrC
 ```
 docs/index.html            问卷网页（GitHub Pages 发布目录），CONFIG 在 <script> 顶部
 survey/apps_script.gs      Google Apps Script 后台
-survey/README.md           后台部署说明 + 表格列说明
-survey/vote_qr.png         问卷二维码
+survey/README.md           后台部署说明（含 clasp 更新步骤）+ 表格列说明
+survey/.clasp.json 等       clasp 配置：scriptId、网页应用 manifest、只推送 apps_script.gs
+survey/vote_qr.png         问卷二维码（指向问卷网址；网址不变就不用重新生成）
 survey/msforms_backup/     Microsoft Forms 导入文件（备份，已不用）
 proposal/                  修订版 proposal（docx/pdf）和生成脚本（content.js 是正文，build.js 生成 Word）
 R/                         00 冒烟测试、01 抽取 Favero 子集、02 复现 Favero
