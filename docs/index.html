@@ -64,16 +64,14 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .scale .opt::before { content: ""; position: absolute; left: -26px; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--sw); border: 3px solid var(--bg); }
 .scale .opt[aria-pressed="true"]::before { width: 22px; height: 22px; margin-top: -11px; left: -28px; }
 .room { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.front { text-align: center; font-size: 13px; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 6px; }
-.floor { display: grid; grid-template-columns: 18px 1fr 18px; gap: 6px; align-items: stretch; }
-.wall { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11.5px; color: var(--muted); text-align: center; }
-.wall.win { border-right: 4px dashed var(--t2); }
-.wall.door { transform: none; }
+.edge { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 12px; color: var(--muted); text-align: center; }
+.front { border: 1px dashed var(--line); border-radius: 8px; padding: 6px 2px; }
+.doormark { border-top: 4px solid var(--muted); padding-top: 4px; }
+.edge.rear .doormark { border-top: 0; border-bottom: 4px solid var(--muted); padding: 0 0 4px; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .zone { aspect-ratio: 1.25; max-width: 100%; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; font-weight: 600; font-size: 18px; cursor: pointer; position: relative; }
 .zone[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
 .zone .last { position: absolute; left: 0; right: 0; bottom: 4px; font-size: 10.5px; font-weight: 500; color: var(--muted); }
-.cols { display: grid; grid-template-columns: 18px 1fr 1fr 1fr 18px; gap: 6px; font-size: 11.5px; color: var(--muted); text-align: center; }
 .codes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .code { font-family: var(--mono); font-size: 14px; padding: 11px 0; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
 .code[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
@@ -122,7 +120,7 @@ const CONFIG = {
   // Participant codes shown on the first screen: P01 ... P30.
   CODE_PREFIX: "P",
   CODE_COUNT: 30,
-  VERSION: "2026-10-18"
+  VERSION: "2026-10-18b"
 };
 /* ================================================================ */
 
@@ -156,7 +154,8 @@ const CONFIG = {
     ["Feet & neck 鞋襪及頸部", [["socks_shoes", "Socks + shoes", "襪及鞋", 0.05], ["sandals", "Sandals / slippers", "涼鞋 / 拖鞋", 0.02], ["boots", "Boots", "靴", 0.10], ["scarf", "Scarf", "圍巾", null]]]
   ];
   const EXTRA = [["sun", "Sunlight on me", "陽光照在身上"], ["draught", "Cold draught from the air-con", "冷氣直吹"], ["stuffy", "Warm or stuffy air", "悶熱 / 空氣不流通"]];
-  const ZONES = ["A1", "B1", "C1", "A2", "B2", "C2", "A3", "B3", "C3"];
+  // 4 rows x 3 columns, row 1 at the front; no windows. Doors: front of column C, back of column A.
+  const ZONES = ["A1", "B1", "C1", "A2", "B2", "C2", "A3", "B3", "C3", "A4", "B4", "C4"];
 
   // first-time steps come before the vote; a returning phone starts at "seat"
   const STEPS = ["consent", "code", "self", "seat", "tsv", "tpv", "tav", "clo", "act", "extra"];
@@ -241,9 +240,9 @@ const CONFIG = {
     } else if (s === "seat") {
       const last = store.get("ccv_seat");
       let h = q("Where are you sitting?", "你坐在哪個區域？", "Tap your zone on the classroom map. 請點選你所在的區域。");
-      h += `<div class="room"><div class="front">Front · whiteboard and screen 前方 · 白板及屏幕</div><div class="floor"><div class="wall win">Window 窗</div><div class="grid">`;
+      h += `<div class="room"><div class="edge"><span></span><div class="front">Whiteboard · podium<br>白板 · 講台</div><div class="doormark">Door 門</div></div><div class="grid">`;
       ZONES.forEach((z) => { h += `<button class="zone" id="zone-${z}" aria-pressed="${a.seat_zone === z}">${z}${last === z && !a.seat_zone ? `<span class="last">last time 上次</span>` : ""}</button>`; });
-      h += `</div><div class="wall door">Door 門</div></div><div class="cols"><span></span><span>A</span><span>B</span><span>C</span><span></span></div></div>`;
+      h += `</div><div class="edge rear"><div class="doormark">Door 門</div><span></span><span></span></div></div>`;
       screen.innerHTML = h;
       screen.querySelectorAll(".zone").forEach((b) => b.onclick = () => {
         a.seat_zone = b.id.slice(5); store.set("ccv_seat", a.seat_zone);
