@@ -7,6 +7,18 @@ A (ordinal-as-metric linear), B (population cumulative probit) and C (hierarchic
 cumulative probit with occupant-specific threshold shift, scale and temperature slope).
 Part 2 couples the fitted models to EnergyPlus controllers.
 
+## Handover and project status
+
+See **[HANDOFF.md](HANDOFF.md)** for the current status, decisions agreed with the supervisor, the open
+issue with the survey backend and the prioritised to-do list.
+
+| Folder | Contents |
+|---|---|
+| `docs/` | Online participant survey (GitHub Pages) |
+| `survey/` | Google Apps Script backend, setup guide, QR code, Microsoft Forms backup |
+| `proposal/` | Revised project proposal (docx/pdf) and the script that builds it |
+| `R/`, `output/` | Toolchain smoke test and the Favero et al. (2023) replication |
+
 ## Setup
 
 Tested on Ubuntu 24.04 with R 4.3.3, brms 2.20.4, rstan 2.32.5, ordinal 2023.12-4, loo 2.6.0
