@@ -4,3 +4,8 @@ output/fits/
 .Rhistory
 .RData
 .Rproj.user/
+
+# Field data (participants) must never be committed: this repository is public
+data/field/
+survey/exports/
+*.xlsx

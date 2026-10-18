@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Classroom Comfort Vote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root {
+  --bg: #F2F5F5; --surface: #FFFFFF; --ink: #15232A; --muted: #5A6B72; --line: #D3DCDE;
+  --accent: #0D7680; --accent-soft: #DCEEEF; --banner: #FFF3D6; --banner-ink: #694800; --err: #B3261E;
+  --t1: #2C64A8; --t2: #4F8FCC; --t3: #9CC1E2; --t4: #C3CBC0; --t5: #EFB277; --t6: #DE7B43; --t7: #C0392B;
+  --font: "IBM Plex Sans", "Noto Sans TC", system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --zh: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0E161A; --surface: #162127; --ink: #E5EDEF; --muted: #97A8AE; --line: #2A3940;
+    --accent: #4DBDC6; --accent-soft: #15373B; --banner: #382C11; --banner-ink: #F1D48E; --err: #F2B8B5;
+    --t1: #4C86CC; --t2: #6EA7DC; --t3: #A8CAE8; --t4: #A6AFA3; --t5: #F1BB84; --t6: #E8905B; --t7: #E15A4B;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(12px, env(safe-area-inset-top, 0px)); padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
+}
+.app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.banner { background: var(--banner); color: var(--banner-ink); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+.banner b { font-weight: 600; }
+.top { display: flex; align-items: center; gap: 10px; }
+.back { border: 1px solid var(--line); background: var(--surface); color: var(--ink); width: 40px; height: 40px; border-radius: 10px; font-size: 18px; cursor: pointer; flex: none; }
+.back:disabled { opacity: .35; cursor: default; }
+.progress { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.progress-meta { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+.code-chip { font-family: var(--mono); color: var(--ink); }
+.code-chip button { border: 0; background: none; color: var(--accent); font: inherit; font-size: 12px; cursor: pointer; padding: 0 0 0 6px; text-decoration: underline; }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .25s ease; }
+.q { display: flex; flex-direction: column; gap: 4px; }
+.q h1 { font-size: 22px; font-weight: 600; margin: 0; text-wrap: balance; }
+.q .zh { font-family: var(--zh); font-size: 17px; color: var(--muted); font-weight: 500; }
+.hint { font-size: 13.5px; color: var(--muted); margin: 2px 0 0; }
+.info { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14.5px; display: flex; flex-direction: column; gap: 8px; }
+.info p { margin: 0; }
+.info .cn { font-family: var(--zh); color: var(--muted); }
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 56px; font: inherit; }
+.opt .lbl { display: flex; flex-direction: column; min-width: 0; }
+.opt .en { font-weight: 600; font-size: 16.5px; }
+.opt .cn { font-family: var(--zh); font-size: 14.5px; color: var(--muted); }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.scale { position: relative; padding-left: 26px; }
+.scale::before { content: ""; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 10px; border-radius: 5px; background: linear-gradient(to bottom, var(--t7), var(--t6), var(--t5), var(--t4), var(--t3), var(--t2), var(--t1)); }
+.scale .opt { position: relative; }
+.scale .opt::before { content: ""; position: absolute; left: -26px; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--sw); border: 3px solid var(--bg); }
+.scale .opt[aria-pressed="true"]::before { width: 22px; height: 22px; margin-top: -11px; left: -28px; }
+.room { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.edge { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 12px; color: var(--muted); text-align: center; }
+.front { border: 1px dashed var(--line); border-radius: 8px; padding: 6px 2px; }
+.doormark { border-top: 4px solid var(--muted); padding-top: 4px; }
+.edge.rear .doormark { border-top: 0; border-bottom: 4px solid var(--muted); padding: 0 0 4px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.zone { aspect-ratio: 1.25; max-width: 100%; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; font-weight: 600; font-size: 18px; cursor: pointer; position: relative; }
+.zone[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
+.zone .last { position: absolute; left: 0; right: 0; bottom: 4px; font-size: 10.5px; font-weight: 500; color: var(--muted); }
+.codes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.code { font-family: var(--mono); font-size: 14px; padding: 11px 0; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.code[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.group { display: flex; flex-direction: column; gap: 8px; }
+.group h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 0 0; letter-spacing: .02em; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 14.5px; cursor: pointer; display: inline-flex; gap: 6px; align-items: baseline; }
+.chip .cn { font-family: var(--zh); color: var(--muted); font-size: 13px; }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
+.chip[aria-pressed="true"]::before { content: "✓"; color: var(--accent); font-weight: 600; }
+.primary { width: 100%; min-height: 54px; border: 0; border-radius: 12px; background: var(--accent); color: var(--surface); font: inherit; font-weight: 600; font-size: 17px; cursor: pointer; position: sticky; bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+.primary:disabled { background: var(--line); color: var(--muted); cursor: default; }
+.done { display: flex; flex-direction: column; gap: 14px; }
+.done .big { font-size: 24px; font-weight: 600; }
+.status { font-size: 14px; color: var(--muted); }
+.status.err { color: var(--err); }
+.record { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; overflow-x: auto; }
+.record table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12.5px; }
+.record td { padding: 3px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.record td:first-child { color: var(--muted); width: 40%; padding-right: 8px; }
+.screen { animation: in .2s ease; }
+@keyframes in { from { opacity: .4; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .screen { animation: none; } .bar span { transition: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="banner" id="banner" hidden></div>
+  <div class="top">
+    <button class="back" id="back" aria-label="Back 返回">←</button>
+    <div class="progress">
+      <div class="progress-meta"><span id="stepText"></span><span class="code-chip" id="codeChip"></span></div>
+      <div class="bar"><span id="barFill"></span></div>
+    </div>
+  </div>
+  <main id="screen" class="screen"></main>
+</div>
+
+<script>
+/* ===================== SETTINGS (edit here) ===================== */
+const CONFIG = {
+  // Google Apps Script web-app URL (ends with /exec). Leave "" for preview mode: nothing is sent.
+  ENDPOINT: "https://script.google.com/macros/s/AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrCcb2e3atyM9NVYW1wYa_WHkG3mF/exec",
+  // Must match KEY in survey/apps_script.gs.
+  KEY: "fyp-ccv-2026",
+  // Participant codes shown on the first screen: P01 ... P30.
+  CODE_PREFIX: "P",
+  CODE_COUNT: 30,
+  VERSION: "2026-10-18b"
+};
+/* ================================================================ */
+
+(function () {
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  const params = new URLSearchParams(location.search);
+  const LIVE = !!CONFIG.ENDPOINT && !params.has("preview");
+  const SHOW_RECORD = params.has("preview") || !CONFIG.ENDPOINT;
+
+  const TSV = [
+    [7, "Hot", "熱", "--t7"], [6, "Warm", "暖", "--t6"], [5, "Slightly warm", "微暖", "--t5"],
+    [4, "Neutral", "不冷不熱", "--t4"], [3, "Slightly cool", "微涼", "--t3"], [2, "Cool", "涼", "--t2"], [1, "Cold", "冷", "--t1"]
+  ];
+  const TPV = [[1, "Warmer", "暖一點"], [2, "No change", "不變"], [3, "Cooler", "涼一點"]];
+  const TAV = [[1, "Acceptable", "可以接受"], [0, "Not acceptable", "不能接受"]];
+  const SELF = [[1, "Much colder", "冷很多"], [2, "A bit colder", "比較冷"], [3, "About the same", "差不多"], [4, "A bit warmer", "比較熱"], [5, "Much warmer", "熱很多"]];
+  const ACT = [
+    [1, "Sitting in this classroom", "坐在這個課室"],
+    [2, "Sitting or standing elsewhere indoors", "在其他室內地方坐著或站著"],
+    [3, "Walking at a normal pace", "正常步速走路（包括從室外走來）"],
+    [4, "Walking fast or climbing stairs", "快走、行樓梯或其他較劇烈活動"]
+  ];
+  const GARMENTS = [
+    ["Upper body 上身", [["tshirt", "T-shirt", "T恤", 0.08], ["shirt_ss", "Short-sleeve shirt / polo", "短袖恤衫", 0.17], ["shirt_ls", "Long-sleeve shirt", "長袖恤衫", 0.25], ["sweater_thin", "Thin sweater", "薄毛衣", 0.25], ["sweater_thick", "Thick sweater", "厚毛衣", 0.36], ["hoodie", "Hoodie", "衞衣", 0.34]]],
+    ["Outer layer 外套", [["jacket_light", "Light jacket", "薄外套", 0.36], ["jacket_thick", "Thick jacket / coat", "厚外套", 0.44], ["down", "Down / padded jacket", "羽絨 / 棉衣", null]]],
+    ["Lower body 下身", [["shorts", "Shorts", "短褲", 0.08], ["trousers_thin", "Thin trousers", "薄長褲", 0.15], ["jeans", "Jeans / thick trousers", "牛仔褲 / 厚長褲", 0.24], ["sweatpants", "Sweatpants", "運動褲", 0.28], ["skirt_thin", "Thin skirt", "薄裙", 0.14], ["skirt_thick", "Thick or long skirt", "厚裙 / 長裙", 0.23], ["dress", "Dress", "連衣裙", 0.29]]],
+    ["Feet & neck 鞋襪及頸部", [["socks_shoes", "Socks + shoes", "襪及鞋", 0.05], ["sandals", "Sandals / slippers", "涼鞋 / 拖鞋", 0.02], ["boots", "Boots", "靴", 0.10], ["scarf", "Scarf", "圍巾", null]]]
+  ];
+  const EXTRA = [["sun", "Sunlight on me", "陽光照在身上"], ["draught", "Cold draught from the air-con", "冷氣直吹"], ["stuffy", "Warm or stuffy air", "悶熱 / 空氣不流通"]];
+  // 4 rows x 3 columns, row 1 at the front; no windows. Doors: front of column C, back of column A.
+  const ZONES = ["A1", "B1", "C1", "A2", "B2", "C2", "A3", "B3", "C3", "A4", "B4", "C4"];
+
+  // first-time steps come before the vote; a returning phone starts at "seat"
+  const STEPS = ["consent", "code", "self", "seat", "tsv", "tpv", "tav", "clo", "act", "extra"];
+  const VOTE_START = STEPS.indexOf("seat");
+  const VOTE_COUNT = STEPS.length - VOTE_START;
+  let a = {}; let step = 0; let history = []; let t0 = Date.now();
+  const $ = (id) => document.getElementById(id);
+  const screen = $("screen");
+
+  function deviceId() {
+    let d = store.get("ccv_device");
+    if (!d) { d = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); store.set("ccv_device", d); }
+    return d;
+  }
+
+  function firstStep() {
+    if (!store.get("ccv_consent")) return 0;
+    if (!store.get("ccv_code")) return STEPS.indexOf("code");
+    if (!store.get("ccv_self")) return STEPS.indexOf("self");
+    return VOTE_START;
+  }
+
+  function start() {
+    a = { participant: store.get("ccv_code"), garments: new Set(), extra: new Set() };
+    history = []; t0 = Date.now();
+    step = firstStep();
+    render();
+    flushQueue();
+  }
+  function go(next) { history.push(step); step = next; render(); }
+  function advance() { setTimeout(() => go(step + 1), 160); }
+
+  function header() {
+    const done = step >= STEPS.length;
+    const inVote = step >= VOTE_START;
+    $("stepText").textContent = done ? "Done 完成" : inVote ? `Question ${step - VOTE_START + 1} of ${VOTE_COUNT}` : "First time only 只需一次";
+    $("barFill").style.width = (done ? 100 : inVote ? Math.round(((step - VOTE_START) / VOTE_COUNT) * 100) : 0) + "%";
+    $("back").disabled = history.length === 0 || done;
+    const chip = $("codeChip"); chip.textContent = "";
+    if (a.participant && inVote) {
+      chip.append(a.participant);
+      if (!done) {
+        const b = document.createElement("button"); b.textContent = "change 更改"; b.id = "changeCode";
+        b.onclick = () => { store.del("ccv_code"); a.participant = null; history = []; step = STEPS.indexOf("code"); render(); };
+        chip.append(b);
+      }
+    }
+  }
+
+  const q = (en, zh, hint) => `<div class="q"><h1>${en}</h1><div class="zh">${zh}</div>${hint ? `<p class="hint">${hint}</p>` : ""}</div>`;
+  const opt = (id, en, cn, pressed, style) => `<button class="opt" id="${id}" aria-pressed="${pressed}" ${style || ""}><span class="lbl"><span class="en">${en}</span><span class="cn">${cn}</span></span></button>`;
+
+  function render() {
+    header();
+    screen.classList.remove("screen"); void screen.offsetWidth; screen.classList.add("screen");
+    if (step >= STEPS.length) return renderDone();
+    const s = STEPS[step];
+    if (s === "consent") {
+      screen.innerHTML = q("Classroom thermal comfort study", "課室熱舒適研究") + `
+        <div class="info">
+          <p>This is a final-year project on how comfortable this classroom feels and how its air-conditioning could use less energy. You will answer a few quick taps (about 40 seconds) at set times in class.</p>
+          <p class="cn">這是一個畢業論文研究，了解課室的冷熱感受及空調如何更節能。你會在課堂指定時間點選幾個選項（約40秒）。</p>
+          <p>Taking part is voluntary and anonymous: no name or student ID is collected. You can stop at any time; to remove your answers, tell the researcher your code.</p>
+          <p class="cn">參與屬自願及匿名，不收集姓名或學號。你可隨時退出；如需刪除你的答案，請把你的編號告訴研究員。</p>
+        </div>
+        <button class="primary" id="agree">I agree to take part 我同意參與</button>`;
+      $("agree").onclick = () => { store.set("ccv_consent", new Date().toISOString()); go(step + 1); };
+    } else if (s === "code") {
+      let h = q("Pick the code on your card", "請選擇編號卡上的編號", "Only the first time on this phone. 此手機只需選一次。") + `<div class="codes">`;
+      for (let i = 1; i <= CONFIG.CODE_COUNT; i++) { const c = CONFIG.CODE_PREFIX + String(i).padStart(2, "0"); h += `<button class="code" id="code-${c}" aria-pressed="${a.participant === c}">${c}</button>`; }
+      screen.innerHTML = h + `</div>`;
+      screen.querySelectorAll(".code").forEach((b) => b.onclick = () => {
+        a.participant = b.textContent; store.set("ccv_code", a.participant);
+        screen.querySelectorAll(".code").forEach((x) => x.setAttribute("aria-pressed", x === b));
+        setTimeout(() => go(store.get("ccv_self") ? VOTE_START : step + 1), 160);
+      });
+    } else if (s === "self") {
+      let h = q("Compared with most people, I usually feel…", "和大多數人相比，我通常覺得…", "Asked once only. 只問一次。") + `<div class="opts">`;
+      SELF.forEach(([v, en, cn]) => { h += opt("self-" + v, en, cn, store.get("ccv_self") === String(v)); });
+      screen.innerHTML = h + `</div>`;
+      bindSingle("self", (v) => { a.self_sens = v; store.set("ccv_self", String(v)); });
+    } else if (s === "seat") {
+      const last = store.get("ccv_seat");
+      let h = q("Where are you sitting?", "你坐在哪個區域？", "Tap your zone on the classroom map. 請點選你所在的區域。");
+      h += `<div class="room"><div class="edge"><span></span><div class="front">Whiteboard · podium<br>白板 · 講台</div><div class="doormark">Door 門</div></div><div class="grid">`;
+      ZONES.forEach((z) => { h += `<button class="zone" id="zone-${z}" aria-pressed="${a.seat_zone === z}">${z}${last === z && !a.seat_zone ? `<span class="last">last time 上次</span>` : ""}</button>`; });
+      h += `</div><div class="edge rear"><div class="doormark">Door 門</div><span></span><span></span></div></div>`;
+      screen.innerHTML = h;
+      screen.querySelectorAll(".zone").forEach((b) => b.onclick = () => {
+        a.seat_zone = b.id.slice(5); store.set("ccv_seat", a.seat_zone);
+        screen.querySelectorAll(".zone").forEach((x) => x.setAttribute("aria-pressed", x === b)); advance();
+      });
+    } else if (s === "tsv") {
+      let h = q("How do you feel right now?", "你此刻感覺如何？") + `<div class="opts scale">`;
+      TSV.forEach(([v, en, cn, tok]) => { h += opt("tsv-" + v, en, cn, a.tsv === v, `style="--sw: var(${tok})"`); });
+      screen.innerHTML = h + `</div>`;
+      bindSingle("tsv", (v) => { a.tsv = v; });
+    } else if (s === "tpv") {
+      let h = q("Right now, I would prefer to be…", "此刻我希望…") + `<div class="opts">`;
+      TPV.forEach(([v, en, cn]) => { h += opt("tpv-" + v, en, cn, a.tpv === v); });
+      screen.innerHTML = h + `</div>`;
+      bindSingle("tpv", (v) => { a.tpv = v; });
+    } else if (s === "tav") {
+      let h = q("Is the temperature here acceptable to you?", "你認為此刻的冷熱環境可以接受嗎？") + `<div class="opts">`;
+      TAV.forEach(([v, en, cn]) => { h += opt("tav-" + v, en, cn, a.accept === v); });
+      screen.innerHTML = h + `</div>`;
+      bindSingle("tav", (v) => { a.accept = v; });
+    } else if (s === "clo") {
+      let h = q("What are you wearing right now?", "你此刻身上穿著甚麼？", "Tick everything you have on now, not what is on your chair or in your bag. 只選此刻穿在身上的。");
+      GARMENTS.forEach(([g, items]) => {
+        h += `<div class="group"><h2>${g}</h2><div class="chips">`;
+        items.forEach(([k, en, cn]) => { h += `<button class="chip" id="g-${k}" aria-pressed="${a.garments.has(k)}">${en} <span class="cn">${cn}</span></button>`; });
+        h += `</div></div>`;
+      });
+      h += `<button class="primary" id="cloNext" ${a.garments.size ? "" : "disabled"}>Next 下一步</button>`;
+      screen.innerHTML = h;
+      screen.querySelectorAll(".chip").forEach((b) => b.onclick = () => {
+        const k = b.id.slice(2);
+        if (a.garments.has(k)) a.garments.delete(k); else a.garments.add(k);
+        b.setAttribute("aria-pressed", a.garments.has(k));
+        $("cloNext").disabled = a.garments.size === 0;
+      });
+      $("cloNext").onclick = () => go(step + 1);
+    } else if (s === "act") {
+      let h = q("In the last 15 minutes, what were you mainly doing?", "過去15分鐘你主要在做甚麼？") + `<div class="opts">`;
+      ACT.forEach(([v, en, cn]) => { h += opt("act-" + v, en, cn, a.activity === v); });
+      screen.innerHTML = h + `</div>`;
+      bindSingle("act", (v) => { a.activity = v; });
+    } else if (s === "extra") {
+      let h = q("Anything else you notice?", "此刻有沒有感到以下情況？", "Optional · tap any that apply, or just submit. 可選答。") + `<div class="chips">`;
+      EXTRA.forEach(([k, en, cn]) => { h += `<button class="chip" id="x-${k}" aria-pressed="${a.extra.has(k)}">${en} <span class="cn">${cn}</span></button>`; });
+      h += `</div><button class="primary" id="submit">Submit 提交</button>`;
+      screen.innerHTML = h;
+      screen.querySelectorAll(".chip").forEach((b) => b.onclick = () => {
+        const k = b.id.slice(2);
+        if (a.extra.has(k)) a.extra.delete(k); else a.extra.add(k);
+        b.setAttribute("aria-pressed", a.extra.has(k));
+      });
+      $("submit").onclick = submit;
+    }
+    const first = screen.querySelector("button");
+    if (first && history.length) first.focus({ preventScroll: true });
+  }
+
+  function bindSingle(prefix, setter) {
+    screen.querySelectorAll(".opt").forEach((b) => b.onclick = () => {
+      setter(Number(b.id.slice(prefix.length + 1)));
+      screen.querySelectorAll(".opt").forEach((x) => x.setAttribute("aria-pressed", x === b)); advance();
+    });
+  }
+
+  function hkNow() {
+    const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Hong_Kong", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })
+      .formatToParts(new Date()).reduce((o, x) => (o[x.type] = x.value, o), {});
+    return `${p.year}-${p.month}-${p.day} ${p.hour === "24" ? "00" : p.hour}:${p.minute}:${p.second}`;
+  }
+
+  function buildRecord() {
+    const all = GARMENTS.flatMap((g) => g[1]);
+    const picked = all.filter((g) => a.garments.has(g[0]));
+    const known = picked.filter((g) => g[3] !== null);
+    return {
+      sid: deviceId() + "-" + Date.now().toString(36),
+      client_time: hkNow(),
+      participant: a.participant,
+      seat_zone: a.seat_zone,
+      tsv: a.tsv,
+      tpv: a.tpv,
+      accept: a.accept,
+      garments: picked.map((g) => g[0]).join(";"),
+      clo: Math.round((0.04 + known.reduce((s, g) => s + g[3], 0)) * 100) / 100,
+      clo_tbc: picked.filter((g) => g[3] === null).map((g) => g[0]).join(";"),
+      activity: a.activity,
+      sun: a.extra.has("sun") ? 1 : 0,
+      draught: a.extra.has("draught") ? 1 : 0,
+      stuffy: a.extra.has("stuffy") ? 1 : 0,
+      self_sens: a.self_sens || Number(store.get("ccv_self")) || "",
+      duration_s: Math.round((Date.now() - t0) / 1000),
+      device_id: deviceId(),
+      version: CONFIG.VERSION,
+      key: CONFIG.KEY
+    };
+  }
+
+  // ---- sending, with a queue kept on the phone if the network fails ----
+  function readQueue() { try { return JSON.parse(store.get("ccv_queue") || "[]"); } catch (e) { return []; } }
+  function writeQueue(qu) { store.set("ccv_queue", JSON.stringify(qu)); }
+
+  // Google Apps Script replies through a cross-site redirect, so the reply is not read ("no-cors").
+  // A network failure still rejects, and the vote is then kept in the queue.
+  // Each vote carries its own id (sid), so a vote sent twice is stored once.
+  async function send(rec) {
+    try {
+      await fetch(CONFIG.ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(rec) });
+      return true;
+    } catch (e) { return false; }
+  }
+
+  async function flushQueue() {
+    if (!LIVE) return;
+    const qu = readQueue(); if (!qu.length) return;
+    const left = [];
+    for (const rec of qu) { if (!(await send(rec))) left.push(rec); }
+    writeQueue(left);
+  }
+
+  let lastRecord = null; let lastStatus = "";
+  async function submit() {
+    const btn = $("submit"); btn.disabled = true; btn.textContent = "Sending… 傳送中…";
+    const rec = buildRecord(); lastRecord = rec;
+    if (!LIVE) { lastStatus = "preview"; go(STEPS.length); return; }
+    const ok = await send(rec);
+    if (ok) { lastStatus = "sent"; await flushQueue(); }
+    else { const qu = readQueue(); qu.push(rec); writeQueue(qu); lastStatus = "queued"; }
+    go(STEPS.length);
+  }
+
+  function renderDone() {
+    const msg = {
+      sent: `<p class="status">Your answer has been recorded. 你的答案已記錄。</p>`,
+      queued: `<p class="status err">No connection right now. Your answer is saved on this phone and will be sent automatically next time you open this page. 暫時未能連線，答案已存在手機，下次打開此頁面時會自動送出。</p>`,
+      preview: `<p class="status">Preview mode: nothing was sent. 預覽模式：沒有送出任何資料。</p>`
+    }[lastStatus] || "";
+    let rows = "";
+    if (SHOW_RECORD && lastRecord) rows = `<div class="record"><table>${Object.entries(lastRecord).filter(([k]) => k !== "key").map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}</table></div>`;
+    screen.innerHTML = `<div class="done"><div><div class="big">Thank you! 多謝！</div>${msg}</div>${rows}
+      <p class="hint">See you at the next vote. 下次投票見。</p>
+      ${SHOW_RECORD ? `<button class="primary" id="again">Try another vote 再試一次</button>` : ""}</div>`;
+    if (SHOW_RECORD) $("again").onclick = start;
+  }
+
+  if (!LIVE) {
+    const b = $("banner"); b.hidden = false;
+    b.innerHTML = "<b>Preview 預覽</b> · Answers are not saved. 此版本不會儲存任何答案。";
+  }
+  $("back").onclick = () => { if (history.length) { step = history.pop(); render(); } };
+  window.addEventListener("online", flushQueue);
+  start();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Push only the backend code and its manifest
+**/**
+!apps_script.gs
+!appsscript.json
