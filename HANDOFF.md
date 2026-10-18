@@ -17,7 +17,7 @@ EnergyPlus 里的空调控制器上，看个性化能不能在同等舒适下省
 | Model C | 分层序数模型：每人有阈值偏移 u_j、温度敏感度 v_j、尺度 s_j（部分汇集） | `bf(tsv ~ top + clo + activity + rh + (1 + top | participant), disc ~ 0 + (1 | participant))` |
 
 注意：`disc` 的截距不能自由估计（和阈值不可同时识别），必须写 `disc ~ 0 + ...`。
-`R/00_smoke_test.R` 里写成了 `disc ~ 1 + (1 | occ)`，是错的，需要改。
+`R/00_smoke_test.R` 已改为 `disc ~ 0 + (1 | occ)`（10/18），和 `ordinal::clmm` 的估计一致。
 
 三个控制器（EnergyPlus，Python API）：1 固定 PMV 设定点；2 基于 Model B；3 基于 Model C
 （在场者平均预测不满意率 ≤ 10% 时选最省电的设定点）。舒适度用 PMV、Model B、Model C
@@ -51,18 +51,18 @@ EnergyPlus 里的空调控制器上，看个性化能不能在同等舒适下省
 3. 但用户把新版本部署成了**库（Library）**，网页应用（Web app）部署仍在跑旧版本；用户运行 `setup()`
    后日志也没有显示表格链接（原因未确认：可能没粘贴新代码、选错了函数，或授权没走完）。
 
-**建议用 clasp 在用户电脑上直接修复，保持原网址：**
+**建议用 clasp 在用户电脑上直接修复，保持原网址。** 云端会话做不了这一步：`script.google.com`
+被网络策略拦截，而且 `clasp login` 需要用户在自己浏览器里授权。`survey/` 里已经放好
+`.clasp.json`（scriptId）、`appsscript.json`（网页应用设置）和 `.claspignore`（只推送
+`apps_script.gs` 和 manifest，已用 `clasp status` 验证），用户不需要改任何文件。
+完整步骤见 `survey/README.md` 的 "Updating the live backend with clasp"，要点：
 
 ```bash
-npm install -g @google/clasp
-# 先在 https://script.google.com/home/usersettings 打开 "Google Apps Script API"
-clasp login
-clasp clone 1R1MZJLTFoITGdBC9KyllHrjoZpX37rndtAuYM1Yl9IKt-vVeTzoEWKmM
-# 用仓库里的 survey/apps_script.gs 替换项目里的代码文件（文件名可能是 代码.js），并检查 appsscript.json 里
-#   "webapp": {"executeAs": "USER_DEPLOYING", "access": "ANYONE_ANONYMOUS"}
-clasp push
-clasp run setup        # 或在网页编辑器里手动运行一次 setup，完成授权
-clasp deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrCcb2e3atyM9NVYW1wYa_WHkG3mF -d "fix standalone sheet"
+cd survey                                   # survey-site 分支
+npx @google/clasp@2.4.2 login               # 固定 2.4.2：clasp 3 改了 deploy 命令
+npx @google/clasp@2.4.2 push                # 问是否覆盖 manifest 时选 y
+npx @google/clasp@2.4.2 open                # 在编辑器里选 setup → 运行 → 授权，日志显示表格链接
+npx @google/clasp@2.4.2 deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrCcb2e3atyM9NVYW1wYa_WHkG3mF -d "fix standalone sheet"
 ```
 
 `clasp deploy -i <部署ID>` 会更新已有的网页应用部署，网址不变，`docs/index.html` 不用改。
@@ -139,7 +139,7 @@ clasp deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrCcb2e3atyM9NVYW1wYa
 - [ ] `R/03_import_votes.R`：读 Google 表格导出的 CSV → 编码（tsv 有序因子、tsv_num = tsv − 4、clo 等）
       → 按第 3 节规则加质量标记 → 按时间和座位列（A→S1 窗、B→S2 中、C→S3 门）匹配传感器读数。
 - [ ] `R/04_parameter_recovery.R`：模拟 N = 20/40/60、每人 10/15/20 票，检验 Model B/C 参数能否被恢复、
-      break-even 曲线的精度；顺便修正 `R/00_smoke_test.R` 里的 `disc ~ 1`。
+      break-even 曲线的精度。
 
 **P2 之后**
 - [ ] 实地勘察后搭 EnergyPlus 单区教室模型 + Controller 1（Python API）。

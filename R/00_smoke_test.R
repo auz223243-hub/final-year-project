@@ -13,7 +13,8 @@ d$y <- cut(1.2 * d$top + u[d$occ] + rnorm(J * n),
 d$y <- factor(d$y, levels = 1:7, ordered = TRUE)
 
 # Model C-like: cumulative probit, occupant threshold shift + slope, occupant scale via disc
-fC <- brm(bf(y ~ top + (1 + top | occ), disc ~ 1 + (1 | occ)),
+# (no disc intercept: it is not identified alongside the thresholds)
+fC <- brm(bf(y ~ top + (1 + top | occ), disc ~ 0 + (1 | occ)),
           data = d, family = cumulative("probit"),
           prior = prior(normal(0, 0.5), dpar = "disc", class = "sd"),
           chains = 2, iter = 1000, refresh = 0, seed = 1)

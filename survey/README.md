@@ -29,6 +29,38 @@ Repository **Settings → Pages → Build and deployment → Source: Deploy from
 branch `survey-site` (or `main` after merging), folder **/docs → Save**. After a minute the
 page is live at the address above.
 
+## Updating the live backend with clasp (keeps the same /exec URL)
+
+`.clasp.json` points at the existing Apps Script project and `appsscript.json` holds the web-app
+settings (execute as me, anyone can access), so no files need editing. `.claspignore` limits
+the push to `apps_script.gs` and `appsscript.json`. Run on your own computer (needs Node.js);
+the commands pin clasp 2.4.2 because clasp 3 renamed `deploy`.
+
+1. Turn on **Google Apps Script API** at <https://script.google.com/home/usersettings>.
+2. In this folder (`survey/` on the `survey-site` branch):
+
+   ```bash
+   npx @google/clasp@2.4.2 login        # browser opens: sign in as auz223243@gmail.com, Allow
+   npx @google/clasp@2.4.2 push         # "overwrite manifest?" -> y. Replaces the old 代码.gs
+   npx @google/clasp@2.4.2 open         # opens the editor
+   ```
+
+3. In the editor choose **setup** in the function list → **Run** → allow the permissions.
+   The execution log prints `Votes are stored in: https://docs.google.com/spreadsheets/…`.
+4. Point the existing web-app deployment at the new code:
+
+   ```bash
+   npx @google/clasp@2.4.2 deployments  # the web-app ID is AKfycbyjZ_6y…WHkG3mF
+   npx @google/clasp@2.4.2 deploy -i AKfycbyjZ_6y88BAOvnpLxH1QasDTIQf2sZeYAoN4GDbrCcb2e3atyM9NVYW1wYa_WHkG3mF -d "fix standalone sheet"
+   ```
+
+5. Open the `/exec` URL: it should show `{"ok":true,"votes":0}`.
+
+Without clasp, the same fix in the editor is: paste `apps_script.gs`, save, run `setup`, then
+**Deploy → Manage deployments →** select the **Web app** deployment (not the Library one)
+**→ pencil icon → Version: New version → Deploy**. Creating a *New deployment* instead gives a
+new URL, which would then have to go into `docs/index.html`.
+
 ## Using it
 
 - Participants scan the QR code, agree once, pick their code once and answer the 7 vote
