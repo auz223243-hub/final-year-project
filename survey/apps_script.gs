@@ -1,3 +1,4 @@
+/** @OnlyCurrentDoc */
 /**
  * Classroom Comfort Vote – Google Sheets backend.
  *
