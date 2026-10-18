@@ -32,7 +32,7 @@ EnergyPlus 里的空调控制器上，看个性化能不能在同等舒适下省
 | R/brms 环境 + Favero 复现 | 完成，44 个参数误差 ≤ 0.005，LOOIC 一致 | `R/`、`output/` |
 | 在线问卷网页 | 已上线（GitHub Pages，分支 `survey-site`，目录 `/docs`） | `docs/index.html` |
 | 问卷后台（Google Apps Script → Google 表格） | **已通**（10/18 用户扫码投票，`/exec` 显示 `votes: 1`） | `survey/apps_script.gs`、`survey/README.md` |
-| 二维码 | 完成（10/18 重新生成，高容错 H 级、1200 px，已解码验证指向问卷网址） | `survey/vote_qr.png` |
+| 二维码 | 完成（10/18 新座位图后重新生成，指向 `…/final-year-project/?v=1018b`；`v` 只用来绕过手机缓存，页面不读它；旧二维码也仍然有效） | `survey/vote_qr.png` |
 | Microsoft Forms 备用方案 | 导入用 Word 文件（已不用，留作备份） | `survey/msforms_backup/` |
 
 - 问卷网址：<https://auz223243-hub.github.io/final-year-project/>（加 `?preview` 为测试模式，不发送数据）
@@ -157,7 +157,7 @@ docs/index.html            问卷网页（GitHub Pages 发布目录），CONFIG 
 survey/apps_script.gs      Google Apps Script 后台
 survey/README.md           后台部署说明（含 clasp 更新步骤）+ 表格列说明
 survey/.clasp.json 等       clasp 配置：scriptId、网页应用 manifest、只推送 apps_script.gs
-survey/vote_qr.png         问卷二维码（指向问卷网址；网址不变就不用重新生成）
+survey/vote_qr.png         问卷二维码（网址带 ?v= 版本标记；页面大改后可换个 v 值重新生成，逼手机加载新版）
 survey/msforms_backup/     Microsoft Forms 导入文件（备份，已不用）
 proposal/                  修订版 proposal（docx/pdf）和生成脚本（content.js 是正文，build.js 生成 Word）
 R/                         00 冒烟测试、01 抽取 Favero 子集、02 复现 Favero
